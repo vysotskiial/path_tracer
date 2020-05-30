@@ -56,7 +56,7 @@ vec3 vec3::normalize()
 	return *this;
 }
 
-void vec3::print()
+void vec3::print() const
 {
 	std::cout << x << " " << y << " " << z << std::endl;
 }

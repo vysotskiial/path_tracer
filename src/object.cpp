@@ -4,10 +4,11 @@
 
 using namespace std;
 
-Ray Sphere::intersect(const Ray &ray, double &t)
+constexpr double eps = 0.0001;
+
+Intersection Sphere::intersect(const Ray &ray)
 {
-	Ray res;
-	t = 0;
+	Intersection res;
 	vec3 ray_to_center = center - ray.start;
 
 	// Quadratic equation for intersection a*t^2 + b*t + c = 0
@@ -22,31 +23,34 @@ Ray Sphere::intersect(const Ray &ray, double &t)
 
 	double discrim = b * b - 4 * c;
 
-	if (discrim < 0)
+	if (discrim < 0) {
 		return res;
+	}
 	double sqrt_disc = sqrt(discrim);
 
-	t = (-b - sqrt_disc) / 2;
-	if (t > 0)
-		return {ray.start + t * ray.dir, {0, 0, 1}, material.color}; // TODO random
-		                                                             // direction
-	t += sqrt_disc;
-	if (t > 0)
-		return {ray.start + t * ray.dir, {0, 0, 1}, material.color}; // TODO random
-		                                                             // direction
+	res.time = (-b - sqrt_disc) / 2;
+	if (res.time < -sqrt_disc + eps) {
+		res.time = 0;
+		return res;
+	}
 
-	t = 0;
+	if (res.time < eps)
+		res.time += sqrt_disc;
+	res.ray.start = ray.start + res.time * ray.dir;
+	res.ray.dir = (res.ray.start - center) / radius;
+	res.material = material;
+
 	return res;
 }
 
-Ray Triangle::intersect(const Ray &ray, double &time)
+Intersection Triangle::intersect(const Ray &ray)
 {
-	Ray res;
-	time = 0;
+	Intersection res;
 	vec3 e1 = B - A;
 	vec3 e2 = C - A;
 	vec3 e = ray.start - A;
 	double denom = -det(e1, e2, ray.dir);
+
 	if (fabs(denom) < 0.001)
 		return res;
 
@@ -56,11 +60,17 @@ Ray Triangle::intersect(const Ray &ray, double &time)
 	double v = -det(e1, e, ray.dir) / denom;
 	if (v < 0. || u + v > 1.)
 		return res;
-	time = det(e1, e2, e) / denom;
-	if (time < 0)
-		time = 0;
+	res.time = det(e1, e2, e) / denom;
+	if (res.time < eps) {
+		res.time = 0.;
+		return res;
+	}
 
-	res.start = A + u * e1 + v * e2;
-	res.color = material.color;
+	res.ray.start = ray.start + res.time * ray.dir;
+	res.ray.dir = vector_prod(e1, e2);
+	if (res.ray.dir * ray.dir > 0)
+		res.ray.dir = -res.ray.dir;
+	res.ray.dir.normalize();
+	res.material = material;
 	return res;
 }

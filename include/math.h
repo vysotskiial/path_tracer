@@ -10,8 +10,12 @@ struct vec3 {
 	vec3(double _x, double _y, double _z): x(_x), y(_y), z(_z) {}
 	vec3(const vec3 &other) = default;
 
-	operator bool() const { return x || y || z; }
-	void print();
+	void print() const;
+	double length() { return sqrt(x * x + y * y + z * z); }
+	bool operator==(const vec3 &other) const
+	{
+		return x == other.x && y == other.y && z == other.z;
+	}
 
 	vec3 &operator+=(const vec3 &other);
 	vec3 operator-() const;
@@ -19,8 +23,7 @@ struct vec3 {
 	vec3 normalize();
 	vec3 get_orthogonal() const;
 
-	template<typename Num>
-	vec3 &operator*=(Num d)
+	vec3 &operator*=(double d)
 	{
 		x *= d;
 		y *= d;
@@ -28,8 +31,7 @@ struct vec3 {
 		return *this;
 	}
 
-	template<typename Num>
-	vec3 &operator/=(Num d)
+	vec3 &operator/=(double d)
 	{
 		x /= d;
 		y /= d;
@@ -37,22 +39,16 @@ struct vec3 {
 		return *this;
 	}
 
-	template<typename Num>
-	friend vec3 operator*(Num d, const vec3 &vec)
+	friend vec3 operator*(double d, const vec3 &vec)
 	{
 		vec3 res(vec);
 		res *= d;
 		return res;
 	}
 
-	template<typename Num>
-	friend vec3 operator*(const vec3 &vec, Num d)
-	{
-		return d * vec;
-	}
+	friend vec3 operator*(const vec3 &vec, double d) { return d * vec; }
 
-	template<typename Num>
-	friend vec3 operator/(const vec3 &vec, Num d)
+	friend vec3 operator/(const vec3 &vec, double d)
 	{
 		vec3 res(vec);
 		res /= d;
@@ -65,9 +61,11 @@ double operator*(const vec3 &lhs, const vec3 &rhs);
 double det(const vec3 &col1, const vec3 &col2, const vec3 &col3);
 vec3 operator+(const vec3 &lhs, const vec3 &rhs);
 vec3 operator-(const vec3 &lhs, const vec3 &rhs);
-
-struct Ray {
-	vec3 start;
-	vec3 dir;
-	vec3 color;
-};
+inline vec3 mult(const vec3 &lhs, const vec3 &rhs)
+{
+	vec3 res{lhs};
+	res.x *= rhs.x;
+	res.y *= rhs.y;
+	res.z *= rhs.z;
+	return res;
+}

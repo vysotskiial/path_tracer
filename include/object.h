@@ -1,13 +1,6 @@
 #pragma once
 
-#include "math.h"
-
-struct Material {
-	vec3 color;
-	bool light{false};
-	bool mirror{false};
-	Material(vec3 col): color(col) {}
-};
+#include "ray.h"
 
 class Object {
 protected:
@@ -17,8 +10,9 @@ public:
 	// Return normal vector to object's surface in the point of intersection
 	// second argument stands for time it takes ray to reach object
 	// meaning ray.start + ray.dir * time is in object
-	virtual Ray intersect(const Ray &ray, double &time) = 0;
+	virtual Intersection intersect(const Ray &ray) = 0;
 	Object(const Material &m): material(m) {}
+	Material mat() const { return material; }
 };
 
 class Sphere : public Object {
@@ -31,7 +25,7 @@ public:
 	  : Object(mat), center(c), radius(r)
 	{
 	}
-	Ray intersect(const Ray &ray, double &time) final;
+	Intersection intersect(const Ray &ray) final;
 };
 
 class Triangle : public Object {
@@ -46,5 +40,8 @@ public:
 	  : Object(mat), A(_A), B(_B), C(_C)
 	{
 	}
-	Ray intersect(const Ray &ray, double &time) final;
+	vec3 getA() const { return A; }
+	vec3 getB() const { return B; }
+	vec3 getC() const { return C; }
+	Intersection intersect(const Ray &ray) final;
 };

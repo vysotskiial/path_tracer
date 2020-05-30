@@ -7,9 +7,11 @@ TEST(test, triangle_has_intersection)
 	Triangle t({-1, 1, 0}, {1, 1, 0}, {0, -1, 0});
 	Ray r = {{3, 3, 3}, {-1, -1, -1}};
 
-	double time;
-	auto intersection = t.intersect(r, time);
-	EXPECT_DOUBLE_EQ(time, 3.);
+	auto intersection = t.intersect(r);
+	EXPECT_DOUBLE_EQ(intersection.time, 3.);
+	EXPECT_DOUBLE_EQ(intersection.ray.dir.x, 0.);
+	EXPECT_DOUBLE_EQ(intersection.ray.dir.y, 0.);
+	EXPECT_DOUBLE_EQ(intersection.ray.dir.z, 1.);
 }
 
 TEST(test, sphere_has_intersection)
@@ -17,12 +19,11 @@ TEST(test, sphere_has_intersection)
 	Sphere s(vec3(), 1);
 	Ray r = {{3, 3, 3}, {-1, -1, -1}};
 
-	double time;
-	auto intersection = s.intersect(r, time);
-	EXPECT_TRUE(time);
-	EXPECT_DOUBLE_EQ(intersection.start.x, std::sqrt(1. / 3));
-	EXPECT_DOUBLE_EQ(intersection.start.y, std::sqrt(1. / 3));
-	EXPECT_DOUBLE_EQ(intersection.start.z, std::sqrt(1. / 3));
+	auto intersection = s.intersect(r);
+	ASSERT_TRUE(intersection.time);
+	EXPECT_DOUBLE_EQ(intersection.ray.start.x, std::sqrt(1. / 3));
+	EXPECT_DOUBLE_EQ(intersection.ray.start.y, std::sqrt(1. / 3));
+	EXPECT_DOUBLE_EQ(intersection.ray.start.z, std::sqrt(1. / 3));
 }
 
 TEST(test, sphere_no_intersection)
@@ -30,9 +31,8 @@ TEST(test, sphere_no_intersection)
 	Sphere s(vec3(), 1);
 	Ray r = {{3, 3, 3}, {1, 1, 1}};
 
-	double time;
-	[[maybe_unused]] auto intersection = s.intersect(r, time);
-	EXPECT_FALSE(time);
+	auto intersection = s.intersect(r);
+	EXPECT_FALSE(intersection.time);
 }
 
 TEST(test, sphere_inside)
@@ -40,12 +40,11 @@ TEST(test, sphere_inside)
 	Sphere s(vec3(), 1);
 	Ray r = {{0, 0, 0}, {-1, 1, -1}};
 
-	double time;
-	auto intersection = s.intersect(r, time);
-	EXPECT_TRUE(time);
-	EXPECT_DOUBLE_EQ(intersection.start.x, -std::sqrt(1. / 3));
-	EXPECT_DOUBLE_EQ(intersection.start.y, std::sqrt(1. / 3));
-	EXPECT_DOUBLE_EQ(intersection.start.z, -std::sqrt(1. / 3));
+	auto intersection = s.intersect(r);
+	ASSERT_TRUE(intersection.time);
+	EXPECT_DOUBLE_EQ(intersection.ray.start.x, -std::sqrt(1. / 3));
+	EXPECT_DOUBLE_EQ(intersection.ray.start.y, std::sqrt(1. / 3));
+	EXPECT_DOUBLE_EQ(intersection.ray.start.z, -std::sqrt(1. / 3));
 }
 
 TEST(test, vector_prod)
