@@ -43,7 +43,7 @@ Intersection Sphere::intersect(const Ray &ray)
 	return res;
 }
 
-Intersection Triangle::intersect(const Ray &ray)
+Intersection PlaneObject::intersect(const Ray &ray)
 {
 	Intersection res;
 	vec3 e1 = B - A;
@@ -55,11 +55,11 @@ Intersection Triangle::intersect(const Ray &ray)
 		return res;
 
 	double u = -det(e, e2, ray.dir) / denom;
-	if (u > 1. || u < 0.)
-		return res;
 	double v = -det(e1, e, ray.dir) / denom;
-	if (v < 0. || u + v > 1.)
+
+	if (!check_intersection({u, v}))
 		return res;
+
 	res.time = det(e1, e2, e) / denom;
 	if (res.time < eps) {
 		res.time = 0.;

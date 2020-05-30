@@ -11,7 +11,8 @@ struct vec3 {
 	vec3(const vec3 &other) = default;
 
 	void print() const;
-	double length() { return sqrt(x * x + y * y + z * z); }
+	double length_sqr() const { return x * x + y * y + z * z; }
+	double length() const { return sqrt(x * x + y * y + z * z); }
 	bool operator==(const vec3 &other) const
 	{
 		return x == other.x && y == other.y && z == other.z;

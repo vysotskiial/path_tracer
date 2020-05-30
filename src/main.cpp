@@ -70,10 +70,8 @@ int main(int argc, char *argv[])
 
 	Material light;
 	light.light = true;
-	Triangle lamp({5, -.5, 0.99}, {5.5, -.5, 0.99}, {5, .5, 0.99}, light);
-	Triangle lamp2({5.5, -.5, 0.99}, {5.5, .5, 0.99}, {5, .5, 0.99}, light);
-	s.add_object(unique_ptr<Object>(new Triangle(lamp)));
-	s.add_object(unique_ptr<Object>(new Triangle(lamp2)));
+	Circle lamp({5.3, 0., 0.99}, {5.6, 0., 0.99}, {5.3, .3, 0.99}, light);
+	s.add_object(unique_ptr<Object>(new Circle(lamp)));
 	s.render_scene(output_file + ".png"s, samples);
 	return 0;
 }

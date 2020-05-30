@@ -66,29 +66,18 @@ void Scene::add_cube(vec3 top_dir, const Triangle &bottom,
 	vec3 B = bottom.getB();
 	vec3 C = bottom.getC();
 	vec3 D = bottom.getC() + bottom.getB() - bottom.getA();
-	objects.push_back(unique_ptr<Object>(new Triangle(A, B, C, sides[Bottom])));
-	objects.push_back(unique_ptr<Object>(new Triangle(C, B, D, sides[Bottom])));
 
 	// Coords of top rectangle
 	vec3 A_ = A + top_dir;
 	vec3 B_ = B + top_dir;
 	vec3 C_ = C + top_dir;
-	vec3 D_ = D + top_dir;
 
-	objects.push_back(unique_ptr<Object>(new Triangle(A, B, A_, sides[Left])));
-	objects.push_back(unique_ptr<Object>(new Triangle(A_, B_, B, sides[Left])));
-
-	objects.push_back(unique_ptr<Object>(new Triangle(A, C, A_, sides[Back])));
-	objects.push_back(unique_ptr<Object>(new Triangle(A_, C_, C, sides[Back])));
-
-	objects.push_back(unique_ptr<Object>(new Triangle(B, D, B_, sides[Front])));
-	objects.push_back(unique_ptr<Object>(new Triangle(B_, D_, D, sides[Front])));
-
-	objects.push_back(unique_ptr<Object>(new Triangle(C, D, C_, sides[Right])));
-	objects.push_back(unique_ptr<Object>(new Triangle(D_, C_, D, sides[Right])));
-
-	objects.push_back(unique_ptr<Object>(new Triangle(A_, B_, C_, sides[Top])));
-	objects.push_back(unique_ptr<Object>(new Triangle(B_, C_, D_, sides[Top])));
+	objects.push_back(unique_ptr<Object>(new Rectangle(A, B, C, sides[Bottom])));
+	objects.push_back(unique_ptr<Object>(new Rectangle(A, B, A_, sides[Left])));
+	objects.push_back(unique_ptr<Object>(new Rectangle(A, C, A_, sides[Back])));
+	objects.push_back(unique_ptr<Object>(new Rectangle(B, D, B_, sides[Front])));
+	objects.push_back(unique_ptr<Object>(new Rectangle(C, D, C_, sides[Right])));
+	objects.push_back(unique_ptr<Object>(new Rectangle(A_, B_, C_, sides[Top])));
 }
 
 inline int toInt(double x)
