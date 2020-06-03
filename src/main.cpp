@@ -65,8 +65,9 @@ int main(int argc, char *argv[])
 
 	Triangle bot({3., -1., -1.}, {6., -1, -1}, {3., 1., -1});
 	s.add_cube({0., 0., 2.}, bot, sides);
-	s.add_object(
-	  unique_ptr<Object>(new Sphere({5.5, .5, -.8}, .2, vec3(0.25, 0.75, 0.75))));
+	Material mirror;
+	mirror.mirror = true;
+	s.add_object(unique_ptr<Object>(new Sphere({5.5, .5, -.5}, .5, mirror)));
 
 	Material light;
 	light.light = true;

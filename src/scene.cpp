@@ -1,4 +1,5 @@
 #include <algorithm>
+#include <cmath>
 #include <random>
 #include <png++/image.hpp>
 #include <png++/png.hpp>
@@ -40,11 +41,16 @@ inline double ddrand()
 
 Color Scene::get_color(const Ray &r, int depth)
 {
-	if (!depth) {
-		return {};
-	}
-
 	Intersection i = intersect(r);
+
+	Color c = i.material.color;
+	if (++depth > 5) {
+		auto max_color = max({c.x, c.y, c.z});
+		if (drand48() < max_color)
+			c /= max_color;
+		else
+			return {};
+	}
 
 	// Didn't hit anything
 	if (i.time == 0) {
@@ -53,10 +59,17 @@ Color Scene::get_color(const Ray &r, int depth)
 
 	if (i.material.light)
 		return {12., 12., 12.};
+	if (i.material.mirror) {
+		vec3 new_dir = r.dir - 2 * (i.ray.dir * r.dir) * i.ray.dir;
+		return get_color(Ray{{i.ray.start}, {new_dir}}, depth);
+	}
+	double r1 = drand48() * M_PI * 2;
+	double r2 = drand48();
+	double r2s = sqrt(r2);
 	vec3 u = i.ray.dir.get_orthogonal();
 	vec3 v = vector_prod(i.ray.dir, u);
-	i.ray.dir = ddrand() * i.ray.dir + ddrand() * u + ddrand() * v;
-	return mult(i.material.color, get_color(i.ray, depth - 1));
+	i.ray.dir = sqrt(1 - r2) * i.ray.dir + cos(r1) * r2s * u + sin(r1) * r2s * v;
+	return mult(c, get_color(i.ray, depth));
 }
 
 void Scene::add_cube(vec3 top_dir, const Triangle &bottom,
@@ -95,7 +108,7 @@ void Scene::render_scene(string filename, int samples)
 			r.dir = camera.camera.dir + camera.plane_x * j + camera.plane_y * i;
 			Color color;
 			for (auto i = 0; i < samples; i++)
-				color += get_color(r, max_depth);
+				color += get_color(r, 0);
 			color /= samples;
 			image[camera.height / 2 - i - 1][j + camera.width / 2] =
 			  png::rgb_pixel(toInt(color.x), toInt(color.y), toInt(color.z));
