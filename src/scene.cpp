@@ -107,7 +107,7 @@ void Scene::render_scene(string filename, int samples)
 		for (int j = -camera.width / 2; j < camera.width / 2; j++) {
 			r.dir = camera.camera.dir + camera.plane_x * j + camera.plane_y * i;
 			Color color;
-			for (auto i = 0; i < samples; i++)
+			for (auto k = 0; k < samples; k++)
 				color += get_color(r, 0);
 			color /= samples;
 			image[camera.height / 2 - i - 1][j + camera.width / 2] =

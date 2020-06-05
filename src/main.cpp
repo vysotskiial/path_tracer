@@ -1,58 +1,39 @@
 #include <iostream>
 #include <getopt.h>
+#include <boost/program_options.hpp>
 #include "scene.h"
 
 using namespace std;
-
-void usage(const char *name)
-{
-	cerr << "Usage: " << name << " <options>\n";
-	cerr << "Options:\n";
-	cerr << "\t --width | -w <width>        set image width\n";
-	cerr << "\t --height | -h <height>      set image height\n";
-	cerr << "\t --samples | -s <samples>    set number of samples per pixel\n";
-	cerr << "\t --output | -o <filename>    set output file name\n";
-}
+namespace po = boost::program_options;
 
 int main(int argc, char *argv[])
 {
-	unsigned width = 512;
-	unsigned height = 512;
-	unsigned samples = 100;
-	string output_file = "image"s;
-
-	constexpr option long_options[] = {
-	  {"width", required_argument, NULL, 'w'},
-	  {"height", required_argument, NULL, 'h'},
-	  {"samples", required_argument, NULL, 's'},
-	  {"output", required_argument, NULL, 'o'},
-	  {0, 0, 0, 0},
-	};
-
-	while (true) {
-		char c = getopt_long(argc, argv, "w:h:s:o:", long_options, NULL);
-		if (c == -1)
-			break;
-		switch (c) {
-		case 'w':
-			width = stoi(optarg);
-			break;
-		case 'h':
-			height = stoi(optarg);
-			break;
-		case 's':
-			samples = stoi(optarg);
-			break;
-		case 'o':
-			output_file = optarg;
-			break;
-		default:
-			usage(argv[0]);
-			return 1;
-		}
+	// clang-format off
+	po::options_description options("Options");
+	options.add_options()
+		("help", "Produce this message")
+		("width,w", po::value<int>()->default_value(512), "Width of image in pixels")
+		("height,h", po::value<int>()->default_value(512), "Height of image in pixels")
+		("samples,s", po::value<int>()->default_value(100), "Number of samples per pixel")
+		("output,o", po::value<string>()->default_value("image"s), "Output file name");
+	// clang-format on
+	po::variables_map args;
+	try {
+		po::store(po::parse_command_line(argc, argv, options), args);
+	}
+	catch (std::exception &e) {
+		cerr << "Error: " << e.what() << "\n";
+		cerr << options << "\n";
+		return 1;
 	}
 
-	Camera c({{3.1, 0, 0}, {0.1, 0, 0}}, width, height);
+	if (args.count("help")) {
+		cout << options << "\n";
+		return 1;
+	}
+
+	Camera c({{3.1, 0, 0}, {0.1, 0, 0}}, args["width"].as<int>(),
+	         args["height"].as<int>());
 	Scene s(c);
 
 	std::array<Material, 6> sides;
@@ -73,6 +54,7 @@ int main(int argc, char *argv[])
 	light.light = true;
 	Circle lamp({5.3, 0., 0.99}, {5.6, 0., 0.99}, {5.3, .3, 0.99}, light);
 	s.add_object(unique_ptr<Object>(new Circle(lamp)));
-	s.render_scene(output_file + ".png"s, samples);
+	s.render_scene(args["output"].as<string>() + ".png"s,
+	               args["samples"].as<int>());
 	return 0;
 }
