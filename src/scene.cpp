@@ -81,16 +81,16 @@ void Scene::add_cube(vec3 top_dir, const Triangle &bottom,
 	vec3 D = bottom.getC() + bottom.getB() - bottom.getA();
 
 	// Coords of top rectangle
-	vec3 A_ = A + top_dir;
-	vec3 B_ = B + top_dir;
-	vec3 C_ = C + top_dir;
+	vec3 A_top = A + top_dir;
+	vec3 B_top = B + top_dir;
+	vec3 C_top = C + top_dir;
 
-	objects.push_back(unique_ptr<Object>(new Rectangle(A, B, C, sides[Bottom])));
-	objects.push_back(unique_ptr<Object>(new Rectangle(A, B, A_, sides[Left])));
-	objects.push_back(unique_ptr<Object>(new Rectangle(A, C, A_, sides[Back])));
-	objects.push_back(unique_ptr<Object>(new Rectangle(B, D, B_, sides[Front])));
-	objects.push_back(unique_ptr<Object>(new Rectangle(C, D, C_, sides[Right])));
-	objects.push_back(unique_ptr<Object>(new Rectangle(A_, B_, C_, sides[Top])));
+	objects.push_back(make_unique<Rectangle>(A, B, C, sides[Bottom]));
+	objects.push_back(make_unique<Rectangle>(A, B, A_top, sides[Left]));
+	objects.push_back(make_unique<Rectangle>(A, C, A_top, sides[Back]));
+	objects.push_back(make_unique<Rectangle>(B, D, B_top, sides[Front]));
+	objects.push_back(make_unique<Rectangle>(C, D, C_top, sides[Right]));
+	objects.push_back(make_unique<Rectangle>(A_top, B_top, C_top, sides[Top]));
 }
 
 inline int toInt(double x)

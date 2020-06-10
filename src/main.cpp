@@ -48,12 +48,12 @@ int main(int argc, char *argv[])
 	s.add_cube({0., 0., 2.}, bot, sides);
 	Material mirror;
 	mirror.mirror = true;
-	s.add_object(unique_ptr<Object>(new Sphere({5.5, .5, -.5}, .5, mirror)));
+	s.add_object(make_unique<Sphere>(vec3{5.5, .5, -.5}, .5, mirror));
 
 	Material light;
 	light.light = true;
-	Circle lamp({5.3, 0., 0.99}, {5.6, 0., 0.99}, {5.3, .3, 0.99}, light);
-	s.add_object(unique_ptr<Object>(new Circle(lamp)));
+	s.add_object(make_unique<Circle>(vec3{5.3, 0., 0.99}, vec3{5.6, 0., 0.99},
+	                                 vec3{5.3, .3, 0.99}, light));
 	s.render_scene(args["output"].as<string>() + ".png"s,
 	               args["samples"].as<int>());
 	return 0;
