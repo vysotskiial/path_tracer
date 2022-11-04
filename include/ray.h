@@ -18,7 +18,7 @@ struct Ray {
 };
 
 struct Intersection {
-	Ray ray;
-	double time{};
-	Material material;
+	Ray ray{};
+	double time{std::numeric_limits<double>().max()};
+	Material material{};
 };

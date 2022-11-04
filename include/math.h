@@ -9,6 +9,7 @@ struct vec3 {
 	vec3() = default;
 	vec3(double _x, double _y, double _z): x(_x), y(_y), z(_z) {}
 	vec3(const vec3 &other) = default;
+	vec3 &operator=(const vec3 &) = default;
 
 	void print() const;
 	double length_sqr() const { return x * x + y * y + z * z; }

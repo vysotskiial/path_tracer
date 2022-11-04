@@ -1,5 +1,6 @@
 #pragma once
 
+#include <type_traits>
 #include "ray.h"
 
 class Object {
@@ -17,27 +18,25 @@ public:
 
 class PlaneObject : public Object {
 protected:
-	// Plane is defined by three points
-	// TODO check that they're not laying on one line
-	vec3 A;
-	vec3 B;
-	vec3 C;
+	// Plane is defined by point and two vectors
+	vec3 O;
+	vec3 e1;
+	vec3 e2;
 
 	virtual bool check_intersection(std::pair<double, double> coords) = 0;
 
 public:
 	PlaneObject(const vec3 &_A, const vec3 &_B, const vec3 &_C,
 	            const Material &mat = vec3())
-	  : Object(mat), A(_A), B(_B), C(_C)
+	  : Object(mat), O(_A), e1(_B), e2(_C)
 	{
 	}
 
-	vec3 getA() const { return A; }
-	vec3 getB() const { return B; }
-	vec3 getC() const { return C; }
-
 	Intersection intersect(const Ray &ray) final;
 };
+
+template<typename T>
+concept Planar = std::is_base_of_v<PlaneObject, T>;
 
 class Sphere : public Object {
 private:
@@ -90,14 +89,14 @@ private:
 
 	bool check_intersection(std::pair<double, double> coords) final
 	{
-		vec3 to_center = (B - A) * coords.first + (C - A) * coords.second;
+		vec3 to_center = e1 * coords.first + e2 * coords.second;
 		return (to_center.length_sqr() <= rad_sqr);
 	}
 
 public:
 	Circle(const vec3 &center, const vec3 &_B, const vec3 &_C,
 	       const Material &mat = vec3())
-	  : PlaneObject(center, _B, _C, mat), rad_sqr((B - A).length_sqr())
+	  : PlaneObject(center, _B, _C, mat), rad_sqr(e1.length_sqr())
 	{
 	}
 };

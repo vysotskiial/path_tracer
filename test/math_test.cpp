@@ -4,7 +4,7 @@
 
 TEST(test, triangle_has_intersection)
 {
-	Triangle t({-1, 1, 0}, {1, 1, 0}, {0, -1, 0});
+	Triangle t({-1, 1, 0}, {2, 0, 0}, {1, -2, 0});
 	Ray r = {{3, 3, 3}, {-1, -1, -1}};
 
 	auto intersection = t.intersect(r);

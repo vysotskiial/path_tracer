@@ -3,40 +3,34 @@
 #include <memory>
 #include <string>
 #include <vector>
+#include <nlohmann/json.hpp>
 #include "object.h"
 
-enum Sides {
-	Top,
-	Bottom,
-	Left,
-	Right,
-	Front,
-	Back,
-};
-
-struct Camera {
-	constexpr static double height_absolute = 1.1547;
-	Ray camera;
+struct Emitter {
+	Ray base; // Ray from point to the center of canvas
 	int width;
 	int height;
+	double canvas_height = 1.1547; // canvas height / base length
+	// Basis of canvas plane
 	vec3 plane_x;
 	vec3 plane_y;
 
-	Camera(const Ray &cam, int w, int h);
+	Emitter() = default;
+	Emitter(const Ray &b, int w, int h, double abs);
 };
 
 class Scene {
 private:
 	constexpr static int max_depth = 8;
+	Emitter emitter;
 	std::vector<std::unique_ptr<Object>> objects;
 	Intersection intersect(const Ray &r);
 	Color get_color(const Ray &r, int depth);
-	Camera camera;
+	void add_spheres(const nlohmann::json &j);
+	template<Planar T>
+	void add_planar_objects(const nlohmann::json &j, const std::string &name);
 
 public:
-	Scene(const Camera &cam): camera(cam) {}
-	void add_object(std::unique_ptr<Object> obj) { objects.push_back(move(obj)); }
-	void add_cube(vec3 top_dir, const Triangle &bottom,
-	              const std::array<Material, 6> &sides);
-	void render_scene(std::string filename, int samples);
+	Scene(const std::string &filename, int w, int h);
+	void render_scene(const std::string &filename, int samples);
 };

@@ -30,7 +30,7 @@ Intersection Sphere::intersect(const Ray &ray)
 
 	res.time = (-b - sqrt_disc) / 2;
 	if (res.time < -sqrt_disc + eps) {
-		res.time = 0;
+		res.time = std::numeric_limits<double>().max();
 		return res;
 	}
 
@@ -46,9 +46,7 @@ Intersection Sphere::intersect(const Ray &ray)
 Intersection PlaneObject::intersect(const Ray &ray)
 {
 	Intersection res;
-	vec3 e1 = B - A;
-	vec3 e2 = C - A;
-	vec3 e = ray.start - A;
+	vec3 e = ray.start - O;
 	double denom = -det(e1, e2, ray.dir);
 
 	if (fabs(denom) < 0.001)
@@ -62,7 +60,7 @@ Intersection PlaneObject::intersect(const Ray &ray)
 
 	res.time = det(e1, e2, e) / denom;
 	if (res.time < eps) {
-		res.time = 0.;
+		res.time = std::numeric_limits<double>().max();
 		return res;
 	}
 
