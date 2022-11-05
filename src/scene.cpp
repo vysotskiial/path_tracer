@@ -1,6 +1,7 @@
 #include <algorithm>
 #include <cmath>
 #include <random>
+#include <thread>
 #include <png++/image.hpp>
 #include <png++/png.hpp>
 #include <numeric>
@@ -63,6 +64,7 @@ void Scene::add_spheres(const json &j)
 }
 
 Scene::Scene(const string &filename, int width, int height)
+  : image(width, height)
 {
 	ifstream ifs(filename);
 	auto config = json::parse(ifs, nullptr, true, true);
@@ -74,9 +76,6 @@ Scene::Scene(const string &filename, int width, int height)
 	add_planar_objects<Rectangle>(config, "rectangles");
 	add_planar_objects<Circle>(config, "circles");
 	add_spheres(config);
-	for (auto &obj : objects) {
-		cerr << obj->mat().mirror << '\n';
-	}
 }
 
 Intersection Scene::intersect(const Ray &r)
@@ -139,21 +138,63 @@ inline int toInt(double x)
 	return int(pow(std::clamp(x, 0., 1.), 1 / 2.2) * 255 + .5);
 }
 
-void Scene::render_scene(const string &filename, int samples)
+void Scene::render_segment(ImageSegment segment)
 {
-	png::image<png::rgb_pixel> image(emitter.width, emitter.height);
 	Ray r;
 	r.start = emitter.base.start;
-	for (int i = -emitter.height / 2; i < emitter.height / 2; i++) {
-		for (int j = -emitter.width / 2; j < emitter.width / 2; j++) {
+	for (int i = segment.y_start; i < segment.y_end; i++) {
+		for (int j = segment.x_start; j < segment.x_end; j++) {
 			r.dir = emitter.base.dir + emitter.plane_x * j + emitter.plane_y * i;
 			Color color;
-			for (auto k = 0; k < samples; k++)
-				color += get_color(r, 0);
+			for (auto k = 0; k < samples; k++) {
+				auto sample_dir = r.dir + (drand48() - 0.5) * emitter.plane_x +
+				                  (drand48() - 0.5) * emitter.plane_y;
+				color += get_color({emitter.base.start, sample_dir}, 0);
+			}
 			color /= samples;
 			image[emitter.height / 2 - i - 1][j + emitter.width / 2] =
 			  png::rgb_pixel(toInt(color.x), toInt(color.y), toInt(color.z));
 		}
 	}
+}
+
+void Scene::start_work()
+{
+	ImageSegment segment;
+	while (work_queue.size()) {
+		{
+			lock_guard lg(mut);
+			if (!work_queue.size())
+				break;
+			segment = work_queue.back();
+			work_queue.pop_back();
+		}
+		render_segment(segment);
+	}
+	return;
+}
+
+void Scene::render_scene(const string &filename, int s, int threads)
+{
+	samples = s;
+	auto queue_size = threads * 8; // just random number whatever
+	auto x_step = emitter.width / queue_size;
+	ImageSegment segment{-emitter.width / 2, -emitter.width / 2 + x_step,
+	                     -emitter.height / 2, emitter.height / 2};
+
+	for (auto i = 0; i < queue_size; i++) {
+		work_queue.push_back(segment);
+		segment.x_start += x_step;
+		segment.x_end += x_step;
+	}
+
+	{
+		vector<jthread> thread_vec;
+
+		for (auto i = 0; i < threads; i++) {
+			thread_vec.push_back(jthread{&Scene::start_work, this});
+		}
+	}
+
 	image.write(filename);
 }
