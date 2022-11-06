@@ -32,7 +32,7 @@ TEST(test, sphere_no_intersection)
 	Ray r = {{3, 3, 3}, {1, 1, 1}};
 
 	auto intersection = s.intersect(r);
-	EXPECT_FALSE(intersection.time);
+	EXPECT_DOUBLE_EQ(intersection.time, std::numeric_limits<double>().max());
 }
 
 TEST(test, sphere_inside)
